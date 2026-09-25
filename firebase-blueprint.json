@@ -1,0 +1,226 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "System user with role-based access for RMA CRM",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "description": "Firebase Auth UID" },
+        "name": { "type": "string", "description": "Full name of the user" },
+        "email": { "type": "string", "format": "email", "description": "Email address" },
+        "photoURL": { "type": "string", "description": "Profile picture URL" },
+        "role": { "type": "string", "enum": ["owner", "sales", "service", "pending"], "description": "Assigned CRM role" },
+        "phone": { "type": "string", "description": "Contact phone number" },
+        "createdAt": { "type": "string", "description": "Creation timestamp" }
+      },
+      "required": ["uid", "name", "email", "role"]
+    },
+    "Customer": {
+      "title": "Customer",
+      "description": "Hospital procurement or client contact",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Unique Customer ID" },
+        "name": { "type": "string", "description": "Customer contact name" },
+        "email": { "type": "string", "format": "email", "description": "Email" },
+        "phone": { "type": "string", "description": "Phone number" },
+        "city": { "type": "string", "description": "Operating city" },
+        "address": { "type": "string", "description": "Full street address" },
+        "hospitalId": { "type": "string", "description": "Associated hospital ID" },
+        "hospitalName": { "type": "string", "description": "Associated hospital name" },
+        "type": { "type": "string", "enum": ["hospital", "clinic", "diagnostic_center", "doctor"], "description": "Facility type" },
+        "createdAt": { "type": "string", "description": "Creation timestamp" }
+      },
+      "required": ["name", "hospitalName", "city"]
+    },
+    "Hospital": {
+      "title": "Hospital",
+      "description": "Medical hospital or institute client",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Unique hospital ID" },
+        "name": { "type": "string", "description": "Hospital name" },
+        "city": { "type": "string", "description": "City location" },
+        "address": { "type": "string", "description": "Address" },
+        "departments": { "type": "array", "description": "List of hospital departments" },
+        "contactPerson": { "type": "string", "description": "Primary administrator contact" },
+        "contactPhone": { "type": "string", "description": "Contact phone" },
+        "createdAt": { "type": "string", "description": "Creation timestamp" }
+      },
+      "required": ["name", "city"]
+    },
+    "Doctor": {
+      "title": "Doctor",
+      "description": "Doctor or key medical decision maker",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Doctor ID" },
+        "name": { "type": "string", "description": "Doctor name" },
+        "hospitalId": { "type": "string", "description": "Hospital reference" },
+        "hospitalName": { "type": "string", "description": "Hospital name" },
+        "department": { "type": "string", "description": "Department (e.g. Cardiology, Radiology)" },
+        "specialization": { "type": "string", "description": "Medical specialization" },
+        "phone": { "type": "string", "description": "Phone number" },
+        "email": { "type": "string", "description": "Email address" },
+        "notes": { "type": "string", "description": "Equipment preferences and notes" },
+        "createdAt": { "type": "string", "description": "Creation timestamp" }
+      },
+      "required": ["name", "hospitalName"]
+    },
+    "SalesVisit": {
+      "title": "SalesVisit",
+      "description": "Log of on-site visits conducted by sales team",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Visit ID" },
+        "date": { "type": "string", "description": "Visit date (YYYY-MM-DD)" },
+        "employeeId": { "type": "string", "description": "Sales employee UID" },
+        "employeeName": { "type": "string", "description": "Sales employee name" },
+        "hospitalName": { "type": "string", "description": "Visited hospital" },
+        "doctorName": { "type": "string", "description": "Doctor or contact visited" },
+        "city": { "type": "string", "description": "City" },
+        "productsDiscussed": { "type": "string", "description": "Products presented or discussed" },
+        "competitor": { "type": "string", "description": "Competitor equipment present or mentioned" },
+        "remarks": { "type": "string", "description": "Detailed visit observations" },
+        "imageUrls": { "type": "array", "description": "Attached photographs or documents" },
+        "expenseAmount": { "type": "number", "description": "Incidental visit expense" },
+        "createdAt": { "type": "string", "description": "Timestamp" }
+      },
+      "required": ["employeeId", "hospitalName", "doctorName", "productsDiscussed", "date"]
+    },
+    "Quotation": {
+      "title": "Quotation",
+      "description": "Equipment quotation generated for medical buyers",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Quotation ID" },
+        "quotationNumber": { "type": "string", "description": "Human readable quote ref (e.g. RMA-QT-1001)" },
+        "customerName": { "type": "string", "description": "Client contact or institution" },
+        "hospitalName": { "type": "string", "description": "Hospital name" },
+        "doctorName": { "type": "string", "description": "Referred doctor" },
+        "equipmentName": { "type": "string", "description": "Equipment name or description" },
+        "amount": { "type": "number", "description": "Quoted total amount in INR" },
+        "status": { "type": "string", "enum": ["Pending", "Sent", "Negotiation", "Approved", "Rejected"], "description": "Quote stage" },
+        "followUpDate": { "type": "string", "description": "Next follow up date" },
+        "notes": { "type": "string", "description": "Terms, warranty, pricing conditions" },
+        "createdBy": { "type": "string", "description": "Sales employee ID" },
+        "createdAt": { "type": "string", "description": "Timestamp" }
+      },
+      "required": ["customerName", "equipmentName", "amount", "status"]
+    },
+    "Expense": {
+      "title": "Expense",
+      "description": "Field expense claim submitted by sales/service engineers",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Expense claim ID" },
+        "employeeId": { "type": "string", "description": "Employee UID" },
+        "employeeName": { "type": "string", "description": "Employee full name" },
+        "type": { "type": "string", "enum": ["Travel", "Food", "Lodging", "Fuel", "Spare Parts", "Client Meeting", "Other"], "description": "Expense category" },
+        "amount": { "type": "number", "description": "Amount in INR" },
+        "remarks": { "type": "string", "description": "Justification notes" },
+        "billImage": { "type": "string", "description": "Receipt or voucher image URL" },
+        "date": { "type": "string", "description": "Date of expenditure" },
+        "status": { "type": "string", "enum": ["Pending", "Approved", "Reimbursed", "Rejected"], "description": "Approval status" },
+        "createdAt": { "type": "string", "description": "Submission timestamp" }
+      },
+      "required": ["employeeId", "type", "amount", "date"]
+    },
+    "ServiceTicket": {
+      "title": "ServiceTicket",
+      "description": "Medical equipment breakdown or preventive maintenance ticket",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Ticket ID" },
+        "ticketNumber": { "type": "string", "description": "Readable ticket reference" },
+        "customerName": { "type": "string", "description": "Hospital customer contact" },
+        "hospitalName": { "type": "string", "description": "Hospital location" },
+        "equipmentName": { "type": "string", "description": "Equipment name" },
+        "serialNumber": { "type": "string", "description": "Machine serial number" },
+        "complaint": { "type": "string", "description": "Reported issue / breakdown description" },
+        "assignedEngineerId": { "type": "string", "description": "Engineer UID" },
+        "assignedEngineer": { "type": "string", "description": "Engineer name" },
+        "status": { "type": "string", "enum": ["Open", "Assigned", "In Progress", "Pending Parts", "Completed"], "description": "Ticket status" },
+        "images": { "type": "array", "description": "Fault or resolution photos" },
+        "resolutionDetails": { "type": "string", "description": "Technician action summary" },
+        "createdAt": { "type": "string", "description": "Ticket creation timestamp" }
+      },
+      "required": ["customerName", "hospitalName", "equipmentName", "complaint", "status"]
+    },
+    "Equipment": {
+      "title": "Equipment",
+      "description": "Installed medical equipment asset tracking",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Equipment asset ID" },
+        "customerName": { "type": "string", "description": "Customer name" },
+        "hospitalName": { "type": "string", "description": "Hospital installed at" },
+        "equipmentName": { "type": "string", "description": "Device title (e.g. Ultrasound GE Voluson, C-Arm)" },
+        "model": { "type": "string", "description": "Model number" },
+        "serialNumber": { "type": "string", "description": "Unique serial number" },
+        "installationDate": { "type": "string", "description": "Installation date" },
+        "warrantyStatus": { "type": "string", "enum": ["Under Warranty", "Comprehensive AMC", "Non-Comprehensive AMC", "Expired", "Out of Warranty"], "description": "Warranty status" },
+        "warrantyExpiryDate": { "type": "string", "description": "Warranty or AMC end date" },
+        "serviceHistory": { "type": "array", "description": "List of past service calls and replaced parts" }
+      },
+      "required": ["customerName", "equipmentName", "serialNumber"]
+    },
+    "Notification": {
+      "title": "Notification",
+      "description": "System alerts for tickets, quotes, approvals",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Notification ID" },
+        "recipientId": { "type": "string", "description": "User UID receiving the alert" },
+        "title": { "type": "string", "description": "Alert title" },
+        "message": { "type": "string", "description": "Alert message" },
+        "link": { "type": "string", "description": "CRM page link" },
+        "read": { "type": "boolean", "description": "Read flag" },
+        "createdAt": { "type": "string", "description": "Timestamp" }
+      },
+      "required": ["recipientId", "title", "message"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "User profiles with role based authorization"
+    },
+    "/customers/{customerId}": {
+      "schema": "Customer",
+      "description": "Hospital customer contacts"
+    },
+    "/hospitals/{hospitalId}": {
+      "schema": "Hospital",
+      "description": "Institutions and hospitals"
+    },
+    "/doctors/{doctorId}": {
+      "schema": "Doctor",
+      "description": "Doctors and department leads"
+    },
+    "/sales_visits/{visitId}": {
+      "schema": "SalesVisit",
+      "description": "Sales field visits logged by sales executives"
+    },
+    "/quotations/{quotationId}": {
+      "schema": "Quotation",
+      "description": "Medical equipment price quotations"
+    },
+    "/expenses/{expenseId}": {
+      "schema": "Expense",
+      "description": "Employee reimbursement claims"
+    },
+    "/service_tickets/{ticketId}": {
+      "schema": "ServiceTicket",
+      "description": "Breakdown and maintenance calls"
+    },
+    "/equipment/{equipmentId}": {
+      "schema": "Equipment",
+      "description": "Installed medical equipment registry"
+    },
+    "/notifications/{notificationId}": {
+      "schema": "Notification",
+      "description": "User alert notifications"
+    }
+  }
+}

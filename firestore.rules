@@ -1,0 +1,120 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner() {
+      return isSignedIn() && (
+        request.auth.token.email == "shahulshaik41953@gmail.com" ||
+        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == "owner")
+      );
+    }
+
+    function isSales() {
+      return isSignedIn() && (
+        isOwner() ||
+        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == "sales")
+      );
+    }
+
+    function isService() {
+      return isSignedIn() && (
+        isOwner() ||
+        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == "service")
+      );
+    }
+
+    function isUserSelf(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    // Default deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Users collection
+    match /users/{userId} {
+      allow read: if isSignedIn();
+      // Allow self registration or owner updates
+      allow create: if isSignedIn() && (isUserSelf(userId) || isOwner());
+      allow update: if isOwner() || (isUserSelf(userId) && (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['role'])));
+      allow delete: if isOwner();
+    }
+
+    // Customers
+    match /customers/{customerId} {
+      allow read: if isSignedIn();
+      allow create, update: if isSales() || isOwner();
+      allow delete: if isOwner();
+    }
+
+    // Hospitals
+    match /hospitals/{hospitalId} {
+      allow read: if isSignedIn();
+      allow create, update: if isSignedIn();
+      allow delete: if isOwner();
+    }
+
+    // Doctors
+    match /doctors/{doctorId} {
+      allow read: if isSignedIn();
+      allow create, update: if isSignedIn();
+      allow delete: if isOwner();
+    }
+
+    // Sales Visits
+    match /sales_visits/{visitId} {
+      allow read: if isSales() || isOwner();
+      allow create: if isSales() || isOwner();
+      allow update: if isOwner() || (isSales() && resource.data.employeeId == request.auth.uid);
+      allow delete: if isOwner();
+    }
+
+    // Quotations
+    match /quotations/{quotationId} {
+      allow read: if isSales() || isOwner();
+      allow create: if isSales() || isOwner();
+      allow update: if isSales() || isOwner();
+      allow delete: if isOwner();
+    }
+
+    // Expenses
+    match /expenses/{expenseId} {
+      allow read: if isOwner() || (isSignedIn() && resource.data.employeeId == request.auth.uid);
+      allow create: if isSignedIn();
+      allow update: if isOwner() || (isSignedIn() && resource.data.employeeId == request.auth.uid);
+      allow delete: if isOwner();
+    }
+
+    // Service Tickets
+    match /service_tickets/{ticketId} {
+      allow read: if isService() || isOwner();
+      allow create: if isService() || isOwner() || isSales();
+      allow update: if isService() || isOwner();
+      allow delete: if isOwner();
+    }
+
+    // Equipment
+    match /equipment/{equipmentId} {
+      allow read: if isSignedIn();
+      allow create, update: if isService() || isOwner() || isSales();
+      allow delete: if isOwner();
+    }
+
+    // Notifications
+    match /notifications/{notificationId} {
+      allow read: if isSignedIn() && resource.data.recipientId == request.auth.uid;
+      allow create: if isSignedIn();
+      allow update: if isSignedIn() && resource.data.recipientId == request.auth.uid;
+      allow delete: if isSignedIn() && resource.data.recipientId == request.auth.uid;
+    }
+  }
+}
